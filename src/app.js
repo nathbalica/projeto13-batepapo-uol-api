@@ -40,8 +40,6 @@ app.post('/participants', async (req, res) => {
         const time = dayjs().format('HH:mm:ss')
         const db = getDatabase()
 
-
-
         if (error) {
             return res.status(422).json({ error: error.details.map(detail => detail.message) }, { abortEarly: false })
         }
@@ -65,10 +63,10 @@ app.post('/participants', async (req, res) => {
             time: time
         })
 
-        return res.sendStatus(201)
+        res.sendStatus(201)
 
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.status(500).send(err.message);
     }
 
 })
@@ -159,7 +157,7 @@ app.post('/status', async (req, res) => {
 
         res.sendStatus(200)
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.status(500).send(err.message);
     }
 
 })
@@ -222,39 +220,31 @@ app.put("/messages/:id", async (req, res) => {
 setInterval(async () => {
     try {
         const db = getDatabase()
-        const tenSecondsAgo = dayjs().subtract(10, 'seconds').toDate();
+        const tenSecondsAgo =  Date.now() - 10000
         const participants = await db.collection("participants").find({ lastStatus: { $lt: tenSecondsAgo } }).toArray();
 
-        for (const participant of participants) {
-            await db.collection("participants").deleteOne({ _id: participant._id });
-            await saveStatusMessage(participant.name)
+        if (participants.length > 0){
+            const statusMessage = participants.map(inative =>{
+                return {
+                    from: inative.from,
+                    to: 'Todos',
+                    text: 'sai da sala...',
+                    type: 'status',
+                    time: time
+                }
+            })
+            await db.collection("messages").insertMany(statusMessage)
+            await db.collection("participants").deleteMany({ lastStatus: { $lt: tenSecondsAgo } })
         }
 
+
     } catch (err) {
-        console.error('Erro ao remover participantes:', err);
+        console.log(err.message);
     }
 
 }, 15000);
 
-async function saveStatusMessage(participantName) {
-    try {
-        const db = getDatabase();
-        const time = dayjs().format('HH:mm:ss');
 
-        const statusMessage = {
-            from: participantName,
-            to: 'Todos',
-            text: 'sai da sala...',
-            type: 'status',
-            time: time
-        }
-
-        await db.collection("messages").insertOne(statusMessage)
-
-    } catch (err) {
-        console.error(`Erro ao salvar mensagem de status para ${participantName}:`, err);
-    }
-}
 
 
 app.listen(process.env.PORT, () => {
