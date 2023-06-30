@@ -35,13 +35,13 @@ app.get('/participants', async (req, res) => {
 app.post('/participants', async (req, res) => {
     try {
         const { name } = req.body;
-        const sanitizedName = stripHtml(name).result.trim();
-        const { error } = nameSchema.validate(sanitizedName);
         const time = dayjs().format('HH:mm:ss')
         const db = getDatabase()
-
+        
+        const sanitizedName = typeof name === "string" && stripHtml(name).result.trim();
+        const { error } = nameSchema.validate({ name: cleanName }, { abortEarly: false });
         if (error) {
-            return res.status(422).json({ error: error.details.map(detail => detail.message) }, { abortEarly: false })
+            return res.status(422).json({ error: error.details.map(detail => detail.message) })
         }
 
         const existingParticipant = await db.collection("participants").findOne({ name: sanitizedName })
@@ -142,7 +142,7 @@ app.post('/status', async (req, res) => {
     const sanitizedUser = stripHtml(user).result.trim();
 
     if (!user) {
-        res.status(404).json({ error: 'O cabeçalho "user" é obrigatorio.' })
+        res.sendStatus(404)
     }
 
     try {
