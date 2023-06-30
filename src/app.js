@@ -27,7 +27,7 @@ app.get('/participants', async (req, res) => {
 
         res.send(listParticipants)
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.status(500).send(err.message);
     }
 })
 
@@ -98,7 +98,7 @@ app.get('/messages', async (req, res) => {
         res.send(messages)
 
     } catch (err) {
-        return res.status(500).json({ error: 'Ocorreu um erro interno no servidor.' });
+        res.status(500).json({ error: 'Ocorreu um erro interno no servidor.' });
     }
 
 })
@@ -129,9 +129,9 @@ app.post('/messages', async (req, res) => {
 
         const message = { ...sanitizedMessage, time }
         await db.collection("messages").insertOne(message)
-        return res.sendStatus(201)
+        res.sendStatus(201)
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.status(500).send(err.message);
     }
 
 })
@@ -181,7 +181,7 @@ app.delete("/messages/:id", async (req, res) => {
         res.sendStatus(204)
 
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.status(500).send(err.message);
     }
 
 })
@@ -211,7 +211,7 @@ app.put("/messages/:id", async (req, res) => {
         await db.collection("messages").updateOne({ _id: new ObjectId(id) }, { $set: { to, text, type }})
         res.sendStatus(200)
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.status(500).send(err.message);
     }
 
 })
