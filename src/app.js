@@ -39,7 +39,8 @@ app.post('/participants', async (req, res) => {
         const db = getDatabase()
         
         const sanitizedName = typeof name === "string" && stripHtml(name).result.trim();
-        const { error } = nameSchema.validate({ name: cleanName }, { abortEarly: false });
+        
+        const { error } = nameSchema.validate({ name: sanitizedName }, { abortEarly: false });
         if (error) {
             return res.status(422).json({ error: error.details.map(detail => detail.message) })
         }
@@ -137,25 +138,23 @@ app.post('/messages', async (req, res) => {
 })
 
 app.post('/status', async (req, res) => {
-    const user = req.headers.user;
+    const { user } = req.headers;
     const db = getDatabase()
-    const sanitizedUser = stripHtml(user).result.trim();
 
     if (!user) {
-        res.sendStatus(404)
+        res.sendStatus(400)
     }
 
     try {
-        const participantExists = await db.collection("participants").findOne({ name: sanitizedUser })
-        if (!participantExists) {
-            return res.status(404)
-        }
 
-        await db.collection("participants").updateOne(
-            { name: sanitizedUser }, { $set: { lastStatus: Date.now() } }
+        const statusUser = await db.collection("participants").updateOne(
+            { name: user }, { $set: { lastStatus: Date.now() } }
         )
 
+        if (statusUser.matchedCount === 0) return res.status(404).json({ error: 'Usuário não encontrado.' });
+        
         res.sendStatus(200)
+
     } catch (err) {
         res.status(500).send(err.message);
     }

@@ -1,26 +1,23 @@
-import Joi from 'joi';
+import joi from 'joi';
 
 
-const nameSchema = Joi.string().required().messages({
-    'any.required': 'O campo "name" é obrigatório.',
-    'string.empty': 'O campo "name" não pode estar vazio.',
-});
+const nameSchema = joi.object({ name: joi.string().required() })
 
 
-const messageSchema = Joi.object({
-    to: Joi.string().required().messages({
+const messageSchema = joi.object({
+    to: joi.string().required().messages({
         'any.required': 'O campo "to" é obrigatório.',
         'string.empty': 'O campo "to" não pode estar vazio.',
     }),
-    text: Joi.string().required().messages({
+    text: joi.string().required().messages({
         'any.required': 'O campo "text" é obrigatório.',
         'string.empty': 'O campo "text" não pode estar vazio.',
     }),
-    type: Joi.string().valid('message', 'private_message').required().messages({
+    type: joi.string().valid('message', 'private_message').required().messages({
         'any.required': 'O campo "type" é obrigatório.',
         'any.only': 'O campo "type" deve ser "message" ou "private_message".',
     }),
-    from: Joi.string().required().messages({
+    from: joi.string().required().messages({
         'any.required': 'O campo "from" é obrigatório.',
         'string.empty': 'O campo "from" não pode estar vazio.',
     })
