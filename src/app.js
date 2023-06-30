@@ -35,11 +35,11 @@ app.get('/participants', async (req, res) => {
 app.post('/participants', async (req, res) => {
     try {
         const { name } = req.body;
-        const time = dayjs().format('HH:mm:ss')
+        const time = dayjs(Date.now()).format('HH:mm:ss')
         const db = getDatabase()
         
         const sanitizedName = typeof name === "string" && stripHtml(name).result.trim();
-        
+
         const { error } = nameSchema.validate({ name: sanitizedName }, { abortEarly: false });
         if (error) {
             return res.status(422).json({ error: error.details.map(detail => detail.message) })
@@ -220,6 +220,7 @@ setInterval(async () => {
     try {
         const db = getDatabase()
         const tenSecondsAgo =  Date.now() - 10000
+        const time = dayjs().format("HH:mm:ss")
         const participants = await db.collection("participants").find({ lastStatus: { $lt: tenSecondsAgo } }).toArray();
 
         if (participants.length > 0){
