@@ -223,15 +223,18 @@ setInterval(async () => {
         const time = dayjs().format("HH:mm:ss")
         const participants = await db.collection("participants").find({ lastStatus: { $lt: tenSecondsAgo } }).toArray();
 
+        console.log(participants)
+
         if (participants.length > 0){
             const statusMessage = participants.map(inative =>{
                 return {
-                    from: inative.from,
+                    from: inative.name,
                     to: 'Todos',
                     text: 'sai da sala...',
                     type: 'status',
                     time: time
                 }
+
             })
             await db.collection("messages").insertMany(statusMessage)
             await db.collection("participants").deleteMany({ lastStatus: { $lt: tenSecondsAgo } })
